@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/api";
 import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -36,28 +37,43 @@ const Dashboard = () => {
     }
   };
 
+  // Obtener idConductor desde el token
+const getIdConductor = () => {
+  if (!token) return null;
+  try {
+    const decoded = jwt_decode(token); // decodifica el JWT
+    return decoded.id; //  asegurarse que el backend incluya el campo 'id' en el token
+  } catch (err) {
+    console.error("Error decodificando token", err);
+    return null;
+  }
+};
+
   // 🔹 Crear nuevo viaje
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      // Este ID debe corresponder al usuario autenticado 
-      const idConductor = 1; //  temporal
-      await API.post(`/viajes/${idConductor}`, nuevoViaje);
-      alert("Viaje creado con éxito");
-      cargarViajes();
-      setNuevoViaje({
-        puntoInicio: "",
-        puntoFinal: "",
-        ruta: "",
-        horaSalida: "",
-        cuposDisponibles: "",
-        tarifa: "",
-        estado: "DISPONIBLE",
-      });
-    } catch (err) {
-      alert("Error creando el viaje");
-    }
-  };
+  e.preventDefault();
+  try {
+    const idConductor = getIdConductor(); // ✅ ahora dinámico
+    if (!idConductor) throw new Error("No se pudo obtener el ID del usuario");
+
+    await API.post(`/viajes/${idConductor}`, nuevoViaje);
+    alert("Viaje creado con éxito");
+    cargarViajes();
+    setNuevoViaje({
+      puntoInicio: "",
+      puntoFinal: "",
+      ruta: "",
+      horaSalida: "",
+      cuposDisponibles: "",
+      tarifa: "",
+      estado: "DISPONIBLE",
+    });
+  } catch (err) {
+    alert("Error creando el viaje");
+    console.error(err);
+  }
+};
+
 
   const handleChange = (e) => {
     setNuevoViaje({ ...nuevoViaje, [e.target.name]: e.target.value });
