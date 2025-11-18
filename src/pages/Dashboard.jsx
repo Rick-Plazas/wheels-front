@@ -41,7 +41,7 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       // Este ID debe corresponder al usuario autenticado 
-      const idConductor = 6; //  temporal
+      const idConductor = 1; //  temporal
       await API.post(`/viajes/${idConductor}`, nuevoViaje);
       alert("Viaje creado con éxito");
       cargarViajes();
